@@ -70,6 +70,9 @@ namespace SrpTask
             if (item.Rare)
                 _gameEngine.PlaySpecialEffect("cool_swirly_particles");
 
+            if (item.Rare && item.Unique)
+                _gameEngine.PlaySpecialEffect("blue_swirly");
+
             Inventory.Add(item);
 
             CalculateStats();

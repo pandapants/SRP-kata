@@ -213,5 +213,20 @@ namespace Tests
             // Assert
             enemy.Received().TakeDamage(100);
         }
+
+        [Fact]
+        public void PickUpItem_ThatIsRareAndUnique_ASpecialEffectShouldBePlayed()
+        {
+            // Arrange
+            var engine = Substitute.For<IGameEngine>();
+            var player = new RpgPlayer(engine);
+            Item rareAndUniqueItem = ItemBuilder.Build.IsRare(true).IsUnique(true);
+
+            // Act
+            player.PickUpItem(rareAndUniqueItem);
+
+            // Assert
+            engine.Received().PlaySpecialEffect("blue_swirly");
+        }
     }
 }
