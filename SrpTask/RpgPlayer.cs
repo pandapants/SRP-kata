@@ -97,13 +97,21 @@ namespace SrpTask
 
         public void TakeDamage(int damage)
         {
+            int inventoryWeight = CalculateInventoryWeight();
+            int damageToDeduct = 0;
+
             if (damage < Armour)
             {
                 _gameEngine.PlaySpecialEffect("parry");
                 return;
             }
 
-            var damageToDeal = damage - Armour;
+            if (inventoryWeight < (CarryingCapacity / 2))
+            {
+                damageToDeduct = (int)(damage * 0.25);
+            }
+
+            var damageToDeal = damage - Armour - damageToDeduct;
             Health -= damageToDeal;
             
             _gameEngine.PlaySpecialEffect("lots_of_gore");

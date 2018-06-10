@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using NSubstitute;
@@ -228,5 +229,22 @@ namespace Tests
             // Assert
             engine.Received().PlaySpecialEffect("blue_swirly");
         }
+
+        [Fact]
+        public void TakeDamage_WithLessThanHalfOfCarryingCapacity_DamageIsReducedBy25()
+        {
+            // Arrange
+            var engine = Substitute.For<IGameEngine>();
+            var player = new RpgPlayer(engine) { Health = 200 };
+            
+            player.PickUpItem(ItemBuilder.Build.WithWeight(player.CarryingCapacity * (int)(0.20)));
+
+            // Act
+            player.TakeDamage(100);
+
+            // Assert
+            player.Health.Should().Be(125);
+        }
+
     }
 }
