@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SrpTask.Contracts;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SrpTask
@@ -8,6 +9,8 @@ namespace SrpTask
         public const int MaximumCarryingCapacity = 1000;
 
         private readonly IGameEngine _gameEngine;
+
+        private readonly IInventoryService _inventoryService;
 
         public int Health { get; set; }
 
@@ -22,9 +25,10 @@ namespace SrpTask
         /// </summary>
         public int CarryingCapacity { get; private set; }
 
-        public RpgPlayer(IGameEngine gameEngine)
+        public RpgPlayer(IGameEngine gameEngine, IInventoryService inventoryService)
         {
             _gameEngine = gameEngine;
+            _inventoryService = inventoryService;
             Inventory = new List<Item>();
             CarryingCapacity = MaximumCarryingCapacity;
         }
@@ -44,11 +48,11 @@ namespace SrpTask
 
         public bool PickUpItem(Item item)
         {
-            var weight = CalculateInventoryWeight();
+            var weight = _inventoryService.GetTotalWeight(Inventory);
             if (weight + item.Weight > CarryingCapacity)
                 return false;
 
-            if (item.Unique && CheckIfItemExistsInInventory(item))
+            if (item.Unique && _inventoryService.Exists(item, Inventory))
                 return false;
 
             // Don't pick up items that give health, just consume them.
@@ -75,29 +79,14 @@ namespace SrpTask
 
             Inventory.Add(item);
 
-            CalculateStats();
+            Armour = _inventoryService.GetTotalArmour(Inventory);
 
             return true;
         }
 
-        private void CalculateStats()
-        {
-            Armour = Inventory.Sum(x => x.Armour);
-        }
-
-        private bool CheckIfItemExistsInInventory(Item item)
-        {
-            return Inventory.Any(x => x.Id == item.Id);
-        }
-
-        private int CalculateInventoryWeight()
-        {
-            return Inventory.Sum(x => x.Weight);
-        }
-
         public void TakeDamage(int damage)
         {
-            int inventoryWeight = CalculateInventoryWeight();
+            int inventoryWeight = _inventoryService.GetTotalWeight(Inventory);
             int damageToDeduct = 0;
 
             if (damage < Armour)
