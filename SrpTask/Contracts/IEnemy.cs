@@ -1,4 +1,4 @@
-﻿namespace SrpTask
+﻿namespace SrpTask.Contracts
 {
     public interface IEnemy
     {

@@ -1,4 +1,4 @@
-﻿using SrpTask;
+﻿using SrpTask.Entities;
 
 namespace Tests
 {

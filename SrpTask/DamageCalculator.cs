@@ -1,5 +1,5 @@
 ﻿using SrpTask.Contracts;
-using SrpTask.Models;
+using SrpTask.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,7 +13,7 @@ namespace SrpTask
             return armour > initialDamange;
         }
 
-        public int GetCarryingCapacityDamageReduction(Inventory inventory, int initialDamage)
+        public int GetLightInventoryDamageReduction(Inventory inventory, int initialDamage)
         {
             int damageReduction = 0;
 
@@ -30,7 +30,7 @@ namespace SrpTask
             int damageReduction = 0;
 
             damageReduction += inventory.Armour;
-            damageReduction += this.GetCarryingCapacityDamageReduction(inventory, initialDamage);
+            damageReduction += this.GetLightInventoryDamageReduction(inventory, initialDamage);
 
             return damageReduction;
         }

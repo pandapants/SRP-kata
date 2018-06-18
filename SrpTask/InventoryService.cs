@@ -1,5 +1,5 @@
 ﻿using SrpTask.Contracts;
-using SrpTask.Models;
+using SrpTask.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

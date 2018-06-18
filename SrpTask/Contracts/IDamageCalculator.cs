@@ -1,4 +1,4 @@
-﻿using SrpTask.Models;
+﻿using SrpTask.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,7 +9,7 @@ namespace SrpTask.Contracts
     {
         bool ArmourIsSufficient(int initialDamange, int armour);
 
-        int GetCarryingCapacityDamageReduction(Inventory inventory, int damage);
+        int GetLightInventoryDamageReduction(Inventory inventory, int damage);
 
         int GetTotalDamageReduction(int damage, Inventory inventory);
     }

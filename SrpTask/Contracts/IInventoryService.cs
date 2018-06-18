@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SrpTask.Models;
+using SrpTask.Entities;
 
 namespace SrpTask.Contracts
 {

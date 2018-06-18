@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using FluentAssertions;
 using NSubstitute;
 using SrpTask;
+using SrpTask.Contracts;
+using SrpTask.Entities;
 using Xunit;
 
 namespace Tests

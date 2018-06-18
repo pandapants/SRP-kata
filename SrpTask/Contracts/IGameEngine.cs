@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using SrpTask.Contracts;
+using System.Collections.Generic;
 
-namespace SrpTask
+namespace SrpTask.Contracts
 {
     public interface IGameEngine
     {

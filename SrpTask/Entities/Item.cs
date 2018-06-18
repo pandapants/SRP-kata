@@ -1,4 +1,4 @@
-﻿namespace SrpTask
+﻿namespace SrpTask.Entities
 {
     public class Item
     {

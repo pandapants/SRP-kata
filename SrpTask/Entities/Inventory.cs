@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SrpTask.Models
+namespace SrpTask.Entities
 {
     public class Inventory
     {
