@@ -1,4 +1,5 @@
 ﻿using SrpTask.Contracts;
+using SrpTask.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,19 +9,25 @@ namespace SrpTask
 {
     public class InventoryService : IInventoryService
     {
-        public bool Exists(Item item, List<Item> inventory)
+        public bool ExistsInInventory(Item item, List<Item> inventory)
         {
             return inventory.Any(x => x.Id == item.Id);
         }
 
-        public int GetTotalWeight(List<Item> inventory)
+        public bool ItemCanBePickedUp(Item item, Inventory inventory)
         {
-            return inventory.Sum(x => x.Weight);
-        }
+            var response = true;
 
-        public int GetTotalArmour(List<Item> inventory)
-        {
-            return inventory.Sum(x => x.Armour);
+            if (inventory.Weight + item.Weight > inventory.CarryingCapacity)
+                response = false;
+
+            if (item.Unique && this.ExistsInInventory(item, inventory.ItemList))
+                response = false;
+
+            if (item.Heal > 0)
+                response = false;
+
+            return response;
         }
     }
 }

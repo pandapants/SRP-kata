@@ -1,4 +1,5 @@
 ﻿using SrpTask.Contracts;
+using SrpTask.Models;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,25 +13,34 @@ namespace SrpTask
 
         private readonly IInventoryService _inventoryService;
 
+        private readonly IDamageCalculator _damageCalculator;
+
         public int Health { get; set; }
 
         public int MaxHealth { get; set; }
 
-        public int Armour { get; private set; }
+        //public int Armour { get; private set; }
 
-        public List<Item> Inventory;
+        public Inventory Inventory;
 
-        /// <summary>
-        /// How much the player can carry in kilograms
-        /// </summary>
-        public int CarryingCapacity { get; private set; }
+        ///// <summary>
+        ///// How much the player can carry in kilograms
+        ///// </summary>
+        //public int CarryingCapacity { get; private set; }
 
-        public RpgPlayer(IGameEngine gameEngine, IInventoryService inventoryService)
+        public RpgPlayer(IGameEngine gameEngine, IInventoryService inventoryService, IDamageCalculator damageCalculator)
         {
             _gameEngine = gameEngine;
             _inventoryService = inventoryService;
-            Inventory = new List<Item>();
-            CarryingCapacity = MaximumCarryingCapacity;
+            _damageCalculator = damageCalculator;
+
+            Inventory = new Inventory()
+            {
+                ItemList = new List<Item>(),
+                CarryingCapacity = MaximumCarryingCapacity,
+                Armour = 0,
+                Weight = 0
+            };
         }
 
         public void UseItem(Item item)
@@ -46,16 +56,21 @@ namespace SrpTask
             }
         }
 
-        public bool PickUpItem(Item item)
+        public void PickUpItem(Item item)
         {
-            var weight = _inventoryService.GetTotalWeight(Inventory);
-            if (weight + item.Weight > CarryingCapacity)
-                return false;
+            if(_inventoryService.ItemCanBePickedUp(item, Inventory))
+            {
+                Inventory.ItemList.Add(item);
+                Inventory.Weight += item.Weight;
+                Inventory.Armour += item.Armour;
+            }
 
-            if (item.Unique && _inventoryService.Exists(item, Inventory))
-                return false;
+            if (item.Rare)
+                _gameEngine.PlaySpecialEffect("cool_swirly_particles");
 
-            // Don't pick up items that give health, just consume them.
+            if (item.Rare && item.Unique)
+                _gameEngine.PlaySpecialEffect("blue_swirly");
+
             if (item.Heal > 0)
             {
                 Health += item.Heal;
@@ -67,43 +82,22 @@ namespace SrpTask
                 {
                     _gameEngine.PlaySpecialEffect("green_swirly");
                 }
-
-                return true;
             }
-
-            if (item.Rare)
-                _gameEngine.PlaySpecialEffect("cool_swirly_particles");
-
-            if (item.Rare && item.Unique)
-                _gameEngine.PlaySpecialEffect("blue_swirly");
-
-            Inventory.Add(item);
-
-            Armour = _inventoryService.GetTotalArmour(Inventory);
-
-            return true;
         }
 
         public void TakeDamage(int damage)
         {
-            int inventoryWeight = _inventoryService.GetTotalWeight(Inventory);
-            int damageToDeduct = 0;
-
-            if (damage < Armour)
+            if (_damageCalculator.ArmourIsSufficient(damage, Inventory.Armour))
             {
                 _gameEngine.PlaySpecialEffect("parry");
-                return;
             }
-
-            if (inventoryWeight < (CarryingCapacity / 2))
+            else
             {
-                damageToDeduct = (int)(damage * 0.25);
-            }
+                var damageReduction = _damageCalculator.GetTotalDamageReduction(damage, Inventory));
+                Health -= (damage - damageReduction);
 
-            var damageToDeal = damage - Armour - damageToDeduct;
-            Health -= damageToDeal;
-            
-            _gameEngine.PlaySpecialEffect("lots_of_gore");
+                _gameEngine.PlaySpecialEffect("lots_of_gore");
+            }
         }
     }
 }
