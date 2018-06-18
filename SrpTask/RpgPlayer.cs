@@ -19,14 +19,7 @@ namespace SrpTask
 
         public int MaxHealth { get; set; }
 
-        //public int Armour { get; private set; }
-
         public Inventory Inventory;
-
-        ///// <summary>
-        ///// How much the player can carry in kilograms
-        ///// </summary>
-        //public int CarryingCapacity { get; private set; }
 
         public RpgPlayer(IGameEngine gameEngine, IInventoryService inventoryService, IDamageCalculator damageCalculator)
         {
@@ -56,20 +49,23 @@ namespace SrpTask
             }
         }
 
-        public void PickUpItem(Item item)
+        //Refactor to not return + break out effects logic
+        public bool PickUpItem(Item item)
         {
             if(_inventoryService.ItemCanBePickedUp(item, Inventory))
             {
                 Inventory.ItemList.Add(item);
                 Inventory.Weight += item.Weight;
                 Inventory.Armour += item.Armour;
+
+                if (item.Rare)
+                    _gameEngine.PlaySpecialEffect("cool_swirly_particles");
+
+                if (item.Rare && item.Unique)
+                    _gameEngine.PlaySpecialEffect("blue_swirly");
+
+                return true;
             }
-
-            if (item.Rare)
-                _gameEngine.PlaySpecialEffect("cool_swirly_particles");
-
-            if (item.Rare && item.Unique)
-                _gameEngine.PlaySpecialEffect("blue_swirly");
 
             if (item.Heal > 0)
             {
@@ -83,6 +79,8 @@ namespace SrpTask
                     _gameEngine.PlaySpecialEffect("green_swirly");
                 }
             }
+
+            return false;
         }
 
         public void TakeDamage(int damage)
@@ -93,7 +91,7 @@ namespace SrpTask
             }
             else
             {
-                var damageReduction = _damageCalculator.GetTotalDamageReduction(damage, Inventory));
+                var damageReduction = _damageCalculator.GetTotalDamageReduction(damage, Inventory);
                 Health -= (damage - damageReduction);
 
                 _gameEngine.PlaySpecialEffect("lots_of_gore");

@@ -14,16 +14,18 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine);
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator);
             Item item = ItemBuilder.Build;
 
-            player.Inventory.Should().BeEmpty();
+            player.Inventory.ItemList.Should().BeEmpty();
 
             // Act
             player.PickUpItem(item);
 
             // Assert
-            player.Inventory.Should().Contain(item);
+            player.Inventory.ItemList.Should().Contain(item);
         }
 
         [Fact]
@@ -31,7 +33,9 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine)
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator)
             {
                 MaxHealth = 100,
                 Health = 10
@@ -43,7 +47,7 @@ namespace Tests
             player.PickUpItem(healthPotion);
 
             // Assert
-            player.Inventory.Should().BeEmpty();
+            player.Inventory.ItemList.Should().BeEmpty();
             player.Health.Should().Be(100);
         }
 
@@ -52,7 +56,9 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine)
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator)
             {
                 MaxHealth = 50,
                 Health = 10
@@ -64,7 +70,7 @@ namespace Tests
             player.PickUpItem(healthPotion);
 
             // Assert
-            player.Inventory.Should().BeEmpty();
+            player.Inventory.ItemList.Should().BeEmpty();
             player.Health.Should().Be(50);
         }
 
@@ -73,7 +79,9 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine);
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator);
             Item rareItem = ItemBuilder.Build.IsRare(true);
 
             // Act
@@ -88,7 +96,9 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine);
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator);
             player.PickUpItem(ItemBuilder.Build.WithId(100));
 
             Item uniqueItem = ItemBuilder.Build.WithId(100).IsUnique(true);
@@ -105,7 +115,9 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine);
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator);
             Item xPotion = ItemBuilder.Build.WithHeal(501);
 
             // Act
@@ -120,8 +132,10 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine);
-            player.Armour.Should().Be(0);
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator);
+            player.Inventory.Armour.Should().Be(0);
 
             Item armour = ItemBuilder.Build.WithArmour(100);
 
@@ -129,7 +143,7 @@ namespace Tests
             player.PickUpItem(armour);
 
             // Assert
-            player.Armour.Should().Be(100);
+            player.Inventory.Armour.Should().Be(100);
         }
 
         [Fact]
@@ -137,8 +151,10 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine);
-            Item heavyItem = ItemBuilder.Build.WithWeight(player.CarryingCapacity + 1);
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator);
+            Item heavyItem = ItemBuilder.Build.WithWeight(player.Inventory.CarryingCapacity + 1);
 
             // Act
             var result = player.PickUpItem(heavyItem);
@@ -152,10 +168,14 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine)
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator)
             {
                 Health = 200
             };
+            //A bit hacky
+            player.PickUpItem(ItemBuilder.Build.WithWeight(600));
 
             // Act
             player.TakeDamage(100);
@@ -170,8 +190,10 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine) {Health = 200};
-            player.PickUpItem(ItemBuilder.Build.WithArmour(50));
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator) { Health = 200 };
+            player.PickUpItem(ItemBuilder.Build.WithArmour(50).WithWeight(500));
 
             // Act
             player.TakeDamage(100);
@@ -186,7 +208,9 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine) {Health = 200};
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator) { Health = 200 };
             player.PickUpItem(ItemBuilder.Build.WithArmour(2000));
 
             // Act
@@ -202,11 +226,13 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine);
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator);
             var enemy = Substitute.For<IEnemy>();
 
             Item item = ItemBuilder.Build.WithName("Stink Bomb");
-            engine.GetEnemiesNear(player).Returns(new List<IEnemy> {enemy});
+            engine.GetEnemiesNear(player).Returns(new List<IEnemy> { enemy });
 
             // Act
             player.UseItem(item);
@@ -220,7 +246,9 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine);
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator);
             Item rareAndUniqueItem = ItemBuilder.Build.IsRare(true).IsUnique(true);
 
             // Act
@@ -235,9 +263,9 @@ namespace Tests
         {
             // Arrange
             var engine = Substitute.For<IGameEngine>();
-            var player = new RpgPlayer(engine) { Health = 200 };
-            
-            player.PickUpItem(ItemBuilder.Build.WithWeight(player.CarryingCapacity * (int)(0.20)));
+            var inventoryService = new InventoryService();
+            var damageCalculator = new DamageCalculator();
+            var player = new RpgPlayer(engine, inventoryService, damageCalculator) { Health = 200 };
 
             // Act
             player.TakeDamage(100);
